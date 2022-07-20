@@ -1,0 +1,5 @@
+name: 'Etisbew'
+description: 'Build website'
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
