@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"html/template"
 	"os"
+	"time"
 
 	"github.com/russross/blackfriday/v2"
 	"gopkg.in/ini.v1"
@@ -14,6 +15,7 @@ type Page struct {
 	Title    string
 	Template string
 	Body     template.HTML
+	Date     *time.Time
 }
 
 const delimiter = "~~~\n"
