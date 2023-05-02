@@ -7,7 +7,9 @@ import (
 	"os"
 	"time"
 
-	"github.com/russross/blackfriday/v2"
+	"github.com/yuin/goldmark"
+	"github.com/yuin/goldmark/extension"
+	"github.com/yuin/goldmark/renderer/html"
 	"gopkg.in/ini.v1"
 )
 
@@ -20,6 +22,19 @@ type Page struct {
 
 const delimiter = "~~~\n"
 
+var md = goldmark.New(
+	goldmark.WithExtensions(
+		extension.DefinitionList,
+		extension.Footnote,
+		extension.Strikethrough,
+		extension.Table,
+		extension.Typographer,
+	),
+	goldmark.WithRendererOptions(
+		html.WithUnsafe(),
+	),
+)
+
 func NewPage(file string) (page Page, err error) {
 	data, err := os.ReadFile(file)
 	if err != nil {
@@ -28,8 +43,13 @@ func NewPage(file string) (page Page, err error) {
 
 	head, body := split(data)
 
+	var buf bytes.Buffer
+	if err = md.Convert(body, &buf); err != nil {
+		err = fmt.Errorf("could not parse page body: %v", err)
+	}
+
+	page.Body = template.HTML(buf.String())
 	page.Template = "default.html"
-	page.Body = template.HTML(string(blackfriday.Run(body)))
 
 	err = ini.MapTo(&page, head)
 	if err != nil {
